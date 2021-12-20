@@ -6,6 +6,7 @@ import ImageBox from './ImageBox.js'
 
 class Main extends Component {
     state = {
+        developer: false,
         currentImage: '',
         chosenImages: [],
         selectButton: 'בחירת תמונה',
@@ -15,7 +16,7 @@ class Main extends Component {
             'לוחם בתרי"ח אגוז',
             'צוות רפואי על גג ביה״ח בזמן מטס יום העצמאות',
             'אח״י מגן מהישט הכניסה למדינת ישראל',
-            'לוחמי יחידת 669 באימון',
+            'לוחמי יחידת 669 בתרגיל',
             'טקס סיום קק"ץ אחוד בבה"ד 1',
             'לוחם דובדבן',
             'תרי"ח אגוז',
@@ -52,7 +53,7 @@ class Main extends Component {
             })
         });
         document.querySelector('.overlay-text').innerHTML = this.state.descriptions[e.target.classList[0] - 1];
-        console.log(this.state.descriptions[e.target.classList[0] - 1])
+        // console.log(this.state.descriptions[e.target.classList[0] - 1])
     }
     closeOverlay = (no) => {
         const overlay = document.querySelector('.overlay');
@@ -69,31 +70,31 @@ class Main extends Component {
     chooseImage = (value) => {
         let remove = false;
         this.state.chosenImages.forEach(image => {
-            console.log(value, image);
+            // console.log(value, image);
             if (value == image) {
                 this.removePicture(value);
                 remove = true;
             }
         })
         if (!remove) {
-            console.log(remove);
+            // console.log(remove);
             let chosenImages = [...this.state.chosenImages];
-            console.log(chosenImages, value);
+            // console.log(chosenImages, value);
             chosenImages.push(parseInt(value));
             this.setState({chosenImages}, () => {
                 this.closeOverlay();
-                console.log(this.state.chosenImages)
+                // console.log(this.state.chosenImages)
             })
         }
     }
     removePicture = (value) => {
         let chosenImages = [...this.state.chosenImages];
         const index = chosenImages.indexOf(value);
-        console.log('final: ', chosenImages);
+        // console.log('final: ', chosenImages);
         chosenImages.splice(index, 1);
-        console.log(chosenImages);
+        // console.log(chosenImages);
         this.setState({chosenImages}, () => {
-            console.log(this.state.chosenImages);
+            // console.log(this.state.chosenImages);
             this.closeOverlay();
         })
     }
@@ -110,7 +111,7 @@ class Main extends Component {
         this.thanks();
         photoNumberArray.forEach(photoNumber => {
             Database.getData(parseInt(photoNumber)).then(res => {
-                console.log(res);
+                // console.log(res);
                 object.chooserCount = res[0].chooserCount + 1;
                 object.choosers = res[0].choosers
                 object.choosers.push(this.state.userIPAddress);
@@ -118,7 +119,7 @@ class Main extends Component {
                 Database.updateData(parseInt(photoNumber), object).then(res => {
                     this.thanks('done');
                 }).catch(error => {
-                    console.log('error');
+                    // console.log('error');
                     setTimeout(() => {
                         this.error();
                     }, 2500)
@@ -130,14 +131,14 @@ class Main extends Component {
             })
         })
         Database.getUserList().then(res => {
-            console.log(res);
+            // console.log(res);
             let users = res[0].users;
             users.push(this.state.userIPAddress);
             const object = {
                 users: users
             }
             Database.updateUserList(object).then(res => {
-                console.log(res);
+                // console.log(res);
             }).catch(error => {
                 console.log(error);
             })
@@ -185,6 +186,10 @@ class Main extends Component {
             this.setState({downloadLink: urls});
         })
         // this.setState({chosenImages: [1, 2, 3, 4, 5]})
+
+        if (window.location.search === '?developer=jonathan') {
+            this.setState({developer: true})
+        }
     }
     render() {
         Database.getData().then(async (res) => {
@@ -193,11 +198,11 @@ class Main extends Component {
             let userIPAddress = '';
             await fetch('https://api.ipify.org/?format=json').then(result => result.json()).then(data => {
                 userIPAddress = data.ip;
-                console.log(data.ip)
+                // console.log(data.ip)
             })
             users.forEach(user => {
-                console.log(user)
-                console.log(userIPAddress)
+                // console.log(user)
+                // console.log(userIPAddress)
                 if (user == userIPAddress) {
                     count++;
                 }
@@ -214,7 +219,7 @@ class Main extends Component {
         })
         return(
             <div className='App'>
-                <div className='image-grid'>
+                <div className='image-grid' style={{display: this.state.developer ? 'block' : 'none'}}>
                     <div className='overlay'>
                         <IconButton classes={{root: 'close-button'}} onClick={this.closeOverlay}>&#10005;</IconButton>
                         <img alt='' className='overlay-img'></img>
@@ -274,6 +279,10 @@ class Main extends Component {
                         מעל 5 פעמים.
                     </h1>
                     <h2>תודה על ההשתתפות!</h2>
+                </div>
+                <div className='vote-closed'>
+                    <h1>ההצבעה נסגרה</h1>
+                    <h2>נתראה בשנה הבאה!</h2>
                 </div>
             </div>
         )
